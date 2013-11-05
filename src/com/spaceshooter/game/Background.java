@@ -11,6 +11,8 @@ public class Background {
 		speedY = 1;
 	}
 	
+	// THIS UPDATED ON GITHUB
+	
 	public void update() {
 		
 		// Scrolls the background down, so it looks like the player is moving
