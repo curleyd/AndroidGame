@@ -11,7 +11,7 @@ public class Background {
 		speedY = 1;
 	}
 	
-	// THIS UPDATED ON GITHUB
+	// THIS UPDATED ON GITHUB, AND AGAIN
 	
 	public void update() {
 		
