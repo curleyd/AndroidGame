@@ -353,7 +353,7 @@ public class GameScreen extends Screen {
 		
 	}
 	
-	// If the player touches the bomb icon while having a bomb, this method is called.
+	// If the player touches the bomb icon while having a bomb, this method is called..
 	// It clears all enemies off the screen and adjusts the score based on each enemy, unless
 	// it is a boss battle. Bombs cannot defeat bosses
 	public void bomb() {
