@@ -11,9 +11,9 @@ package com.spaceshooter.game;
 
 import java.util.ArrayList;
 
-import com.spaceshooter.framework.Image;
-
 import android.graphics.Rect;
+
+import com.spaceshooter.framework.Image;
 
 
 public abstract class Enemy {

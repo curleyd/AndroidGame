@@ -11,7 +11,6 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.util.Log;
 
-import com.spaceshooter.game.R;
 import com.spaceshooter.framework.Screen;
 import com.spaceshooter.framework.implementation.AndroidGame;
 

@@ -2,8 +2,8 @@ package com.spaceshooter.game;
 
 import com.spaceshooter.framework.Game;
 import com.spaceshooter.framework.Graphics;
-import com.spaceshooter.framework.Screen;
 import com.spaceshooter.framework.Graphics.ImageFormat;
+import com.spaceshooter.framework.Screen;
 
 public class SplashLoadingScreen extends Screen {
 	public SplashLoadingScreen(Game game) {

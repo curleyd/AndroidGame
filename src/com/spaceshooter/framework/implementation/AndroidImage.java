@@ -2,8 +2,8 @@ package com.spaceshooter.framework.implementation;
 
 import android.graphics.Bitmap;
 
-import com.spaceshooter.framework.Image;
 import com.spaceshooter.framework.Graphics.ImageFormat;
+import com.spaceshooter.framework.Image;
 
 public class AndroidImage implements Image {
     Bitmap bitmap;

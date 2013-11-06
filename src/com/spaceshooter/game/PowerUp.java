@@ -1,8 +1,8 @@
 package com.spaceshooter.game;
 
-import com.spaceshooter.framework.Image;
-
 import android.graphics.Rect;
+
+import com.spaceshooter.framework.Image;
 
 public class PowerUp {
 	

@@ -1,12 +1,7 @@
 package com.spaceshooter.framework.implementation;
 
-import java.util.List;
-
 import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.ActivityManager.RunningTaskInfo;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -18,11 +13,6 @@ import android.os.PowerManager.WakeLock;
 import android.view.Window;
 import android.view.WindowManager;
 
-import com.spaceshooter.framework.implementation.AndroidAudio;
-import com.spaceshooter.framework.implementation.AndroidFastRenderView;
-import com.spaceshooter.framework.implementation.AndroidFileIO;
-import com.spaceshooter.framework.implementation.AndroidGraphics;
-import com.spaceshooter.framework.implementation.AndroidInput;
 import com.spaceshooter.framework.Audio;
 import com.spaceshooter.framework.FileIO;
 import com.spaceshooter.framework.Game;

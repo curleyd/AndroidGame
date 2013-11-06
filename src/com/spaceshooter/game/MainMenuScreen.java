@@ -2,13 +2,10 @@ package com.spaceshooter.game;
 
 import java.util.List;
 
-import com.spaceshooter.game.Assets;
-import com.spaceshooter.game.GameScreen;
-import com.spaceshooter.game.HighScoresScreen;
 import com.spaceshooter.framework.Game;
 import com.spaceshooter.framework.Graphics;
-import com.spaceshooter.framework.Screen;
 import com.spaceshooter.framework.Input.TouchEvent;
+import com.spaceshooter.framework.Screen;
 
 public class MainMenuScreen extends Screen {
 	public MainMenuScreen(Game game) {
