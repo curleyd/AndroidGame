@@ -25,7 +25,7 @@ public class Player {
 	// isDying - set to 100 when the user dies and has lives left, this keeps the user invicible to damage for
 	// 			 a short amount of time
 	public int health = 1, triShotCounter = 50, isDying = 0;
-	private int firerate = 9;
+	private int firerate = 13;
 	
 	// triShot - whether or not the triShot PowerUp is currently active
 	public boolean triShot = false;
@@ -45,7 +45,7 @@ public class Player {
 		if(isDying <= 30) { 
 			firerate--;
 			if(firerate <= 0) {
-				firerate = 9;
+				firerate = 13;
 				if(!triShot)
 					this.shoot();
 				else {
@@ -59,8 +59,7 @@ public class Player {
 		}
 		
 		// Updates movement
-		centerX += getMoveX(eventx, eventy, 12);
-		centerY += getMoveY(eventx, eventy, 12);
+		move();
 		
 		// Sets up the rectangles for collision detection
 		rect.set(centerX - 35, centerY - 10, centerX + 35, centerY + 17);
@@ -73,8 +72,11 @@ public class Player {
 		
 		// Creates a new projectile, sets its Y speed at 15, and adds it to the ArrayList
 		Projectile p = new Projectile(centerX, centerY-22);
-		p.setSpeedY(15);
+		p.setSpeedY(13);
 		projectiles.add(p);
+		
+		if(GameScreen.playSound)
+			Assets.shoot.play(0.1f);
 		
 	}
 	
@@ -85,69 +87,77 @@ public class Player {
 		Projectile p = new Projectile(centerX, centerY-22);
 		Projectile p1 = new Projectile(centerX, centerY-22);
 		Projectile p2 = new Projectile(centerX, centerY-22);
-		p.setSpeedY(15);
+		p.setSpeedY(13);
 		projectiles.add(p);
-		p1.setSpeedY(15);
+		p1.setSpeedY(13);
 		p1.setSpeedX(-2);
 		projectiles.add(p1);
-		p2.setSpeedY(15);
+		p2.setSpeedY(13);
 		p2.setSpeedX(2);
 		projectiles.add(p2);
 		
+		if(GameScreen.playSound)
+			Assets.shoot.play(0.1f);
+		
 	}
 	
-	// Gets the moveSpeed of the ship in the X direction based on simple vector calculations
-	public int getMoveX(int eventx, int eventy, int moveSpeed) {
+	// Moves the ship
+	public void move() {
 		
 		// Gets the i and j components of the vector from the location of the touch to the center of the ship
 		int i = eventx - centerX;
 		int j = eventy - centerY;
 		
-		// Calculates the magnitude of the vector and then the X component of the unit vector
+		// Calculates the magnitude of the vector and then the unit vector
 		double distance = Math.sqrt((i*i) + (j*j));
 		double unitX = i / distance;
+		double unitY = j / distance;
 		
-		// The X component of the unit vector is then multiplied by the movespeed to get the 
+		// Eachcomponent of the unit vector is then multiplied by the movespeed to get the 
 		// movement in the X direction.
-		int moveX = (int) (unitX * moveSpeed);
+		int moveX = (int) (unitX * 8);
+		int moveY = (int) (unitY * 8);
 		
 		// If the moveSpeed is too high, the ship will overshoot the touch event, resulting in 
-		// erratic ship behavior. Here, we recursively call this function so that the moveSpeed is lowered
-		// by 1 until the distance from the touch event to the new position of the ship is valid
-		if(moveX > 0)
-			if(centerX + moveX > eventx)
-				moveX = getMoveX(eventx, eventy, moveSpeed-1);
+		// erratic ship behavior. The for loops check if the movement speed would overshoot the event,
+		// and decrease the factor that the unit vector is being multiplied by, which is essentially
+		// how far the ship will travel.
+		if(moveX > 0) {
+			for(int a = 7; a >= 0; a--) {
+				if(centerX + moveX < eventx)
+					break;
+				moveX = (int) (unitX * a);
+			}
+		} 
+		else {
+			for(int a = 7; a >= 0; a--) {
+				if(centerX + moveX > eventx)
+					break;
+				moveX = (int) (unitX * a);
+			}
+		}
 		
-		if(moveX < 0)
-			if(centerX + moveX < eventx)
-				moveX = getMoveX(eventx, eventy, moveSpeed-1);
+		if(moveY > 0) {
+			for(int a = 7; a >= 0; a--) {
+				if(centerY + moveY < eventy)
+					break;
+				moveY = (int) (unitY * a);
+			}
+		} 
+		else {
+			for(int a = 7; a >= 0; a--) {
+				if(centerY + moveY > eventy)
+					break;
+				moveY = (int) (unitY * a);
+			}
+		}
+		
+		// Moving the ship by the movespeed of each component
+		centerX += moveX;
+		centerY += moveY;
 		
 		// Sets the turnValue to the moveX value so that the correct ship bank image is displayed
 		GameScreen.turnValue = moveX;
-		
-		return moveX;
-	}
-	
-	// See getMoveX() above
-	public int getMoveY(int eventx, int eventy, int moveSpeed) {
-		
-		int i = eventx - centerX;
-		int j = eventy - centerY;
-		
-		double distance = Math.sqrt((i*i) + (j*j));
-		double unitY = j / distance;
-		
-		int moveY = (int) (unitY * moveSpeed);
-		
-		if(moveY > 0)
-			if(centerY + moveY > eventy)
-				moveY = getMoveY(eventx, eventy, moveSpeed-1);
-		
-		if(moveY < 0)
-			if(centerY + moveY < eventy)
-				moveY = getMoveY(eventx, eventy, moveSpeed-1);
-		
-		return moveY;
 	}
 
 	public int getCenterX() {

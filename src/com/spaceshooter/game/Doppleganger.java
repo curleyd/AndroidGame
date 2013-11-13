@@ -14,10 +14,10 @@ public class Doppleganger extends Enemy {
 		created = true;
 		isMoving = false;
 		
-		speedY = 2;
-		speedX = 2;
+		speedY = 1;
+		speedX = 1;
 		health = 100;
-		firerate = 15;
+		firerate = 30;
 		
 		image = Assets.doppleganger;
 		r = new Rect(0, 0, 0, 0);
@@ -35,10 +35,10 @@ public class Doppleganger extends Enemy {
 		}
 		else {
 			if(!isMoving) {
-				speedX = (int) (Math.random() * 7) - 3;
+				speedX = (int) (Math.random() * 4) - 2;
 				if(speedX == 0)
 					speedX++;
-				speedY = (int) (Math.random() * 7) - 3;
+				speedY = (int) (Math.random() * 4) - 2;
 				if(speedY == 0)
 					speedY++;
 				isMoving = true;
@@ -64,15 +64,10 @@ public class Doppleganger extends Enemy {
 		if (player.isDying == 0) {
 			firerate--;
 			if(firerate <= 0) {
-				firerate = 15;
+				firerate = 30;
 				this.shoot();
 			}
 		}
-
-	}
-
-	@Override
-	public void follow() {
 
 	}
 

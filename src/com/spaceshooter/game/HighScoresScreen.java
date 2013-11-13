@@ -36,8 +36,7 @@ public class HighScoresScreen extends Screen {
 		}
 	}
 
-	private boolean inBounds(TouchEvent event, int x, int y, int width,
-			int height) {
+	private boolean inBounds(TouchEvent event, int x, int y, int width, int height) {
 		if (event.x > x && event.x < x + width - 1 && event.y > y
 				&& event.y < y + height - 1)
 			return true;
@@ -46,28 +45,49 @@ public class HighScoresScreen extends Screen {
 	}
 
 	@Override
-	public void paint(float deltaTime) {
 		
-		int[] scores = game.getHighScores();
+	public void paint(float deltaTime) {
 		
 		Graphics g = game.getGraphics();
 		
-		Paint paint = new Paint();
-		paint.setTextSize(30);
-		paint.setTextAlign(Paint.Align.CENTER);
-		paint.setAntiAlias(true);
-		paint.setColor(Color.WHITE);
+		String[] names = game.getNHighScores();
+		int[] scores = game.getHighScores();
 		
-		g.drawImage(Assets.background, 0, 0);
-		g.drawARGB(155, 0, 0, 0);
+        Paint paint = new Paint();
+        paint.setTextSize(30);
+        paint.setTextAlign(Paint.Align.LEFT);
+        paint.setAntiAlias(true);
+        paint.setColor(Color.WHITE);
+		
+		g.drawImage(Assets.highScores, 0, 0);
 		g.drawImage(Assets.menu_back, 250, 750);
-		
-		for(int i = 0; i < 10; i++) {
-			String sc = "" + scores[9-i] + " pts";
-			g.drawString(sc, 300, ((800/11)*i)+30, paint);
+			
+		for(int i = 0; i < 10; i ++){
+			
+			String score, numbering, name;
+			
+				numbering = (i+1) + " : "; 
+						
+					if(scores[9-i] != 0){
+						
+						name = names[9-i];
+						score = scores[9-i] + "";									
+					}
+					
+					else{
+						name = "TBD";
+						score = "To Be Determined";
+					}
+			
+			g.drawString(numbering, 90, 255 + (i * 52), paint);
+			g.drawString(name, 150, 255 + (i * 52), paint);
+			paint.setTextAlign(Paint.Align.RIGHT);
+			g.drawString(score, 510, 255 + (i * 52), paint);
+			paint.setTextAlign(Paint.Align.LEFT);
+			
 		}
 	}
-
+		
 	@Override
 	public void pause() {
 	}

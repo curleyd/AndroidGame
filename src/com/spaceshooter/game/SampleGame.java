@@ -29,6 +29,11 @@ public class SampleGame extends AndroidGame {
 
 		InputStream is = getResources().openRawResource(R.raw.map1);
 		map = convertStreamToString(is);
+		
+		SharedPreferences prefs = this.getSharedPreferences("options", Context.MODE_PRIVATE);
+		GameScreen.playSound = prefs.getBoolean("sound", true);
+		GameScreen.playMusic = prefs.getBoolean("music", true);
+		
 
 		return new SplashLoadingScreen(this);
 
@@ -63,15 +68,28 @@ public class SampleGame extends AndroidGame {
 
 	@Override
 	public void onResume() {
+		
 		super.onResume();
-		Assets.theme.play();
+		
+		if(this.getCurrentScreen() instanceof GameScreen) {
+			if(GameScreen.playMusic)
+				GameScreen.music.play();
+		}
+		if(this.getCurrentScreen() instanceof MainMenuScreen || this.getCurrentScreen() instanceof HighScoresScreen)
+			if(GameScreen.playMusic)
+				Assets.theme.play();
 
 	}
 
 	@Override
 	public void onPause() {
+		
 		super.onPause();
-		Assets.theme.pause();
+		
+		if(this.getCurrentScreen() instanceof GameScreen)
+			GameScreen.music.stop();
+		if(this.getCurrentScreen() instanceof MainMenuScreen || this.getCurrentScreen() instanceof HighScoresScreen)
+			Assets.theme.stop();
 
 	}
 	
@@ -90,29 +108,49 @@ public class SampleGame extends AndroidGame {
 	}
 
 	@Override
-	public void setHighScores(int score) {
+	public void setAudio() {
 		
-		SharedPreferences prefs = this.getSharedPreferences("highScores", Context.MODE_PRIVATE);
+		SharedPreferences prefs = this.getSharedPreferences("options", Context.MODE_PRIVATE);
 		Editor editor = prefs.edit();
-		int[] scores = getHighScores();
 		
-		if(score > scores[0]) {
-			
-			String value;
-			
-			scores[0] = score;
-			Arrays.sort(scores);
-			
-			for(int i = 0; i < 10; i++) {
-				
-				String key = "" + i;
-				editor.putInt(key, scores[i]);
-				editor.commit();
-				System.out.println(scores[i]);
-			}
-		}
+		editor.putBoolean("sound", GameScreen.playSound);
+		editor.putBoolean("music", GameScreen.playMusic);
+		editor.commit();
 		
 	}
+
+	@Override
+	public String[] getNHighScores(){
+		
+		SharedPreferences prefs = this.getSharedPreferences("NhighScores", Context.MODE_PRIVATE);
+		String[] names = new String[10];
+		
+			for(int i = 0; i < 10; i++){
+				String key = "" + i;
+				names[i] = prefs.getString(key, "");
+			}
+			
+		return names;		
+	}
+	
+	@Override
+	public boolean checkScore(int score){
+		
+		SharedPreferences prefs = this.getSharedPreferences("highScores", Context.MODE_PRIVATE);
+		int[] scores = new int[10];
+		
+			for(int i = 0; i < 10; i++){
+				String key = "" + i;
+				scores[i] = prefs.getInt(key, 0);
+				
+					if(score > scores[i])
+						return true;
+			}
+			
+		return false;			
+	}
+	
+	
 	
 	
 }

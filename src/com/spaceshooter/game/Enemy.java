@@ -23,6 +23,7 @@ public abstract class Enemy {
 	protected Background bg = GameScreen.getBg1();
 	protected Player player = GameScreen.getPlayer();
 	protected Image image;
+	protected boolean visible = true;
 
 	protected Rect r;
 	
@@ -42,13 +43,12 @@ public abstract class Enemy {
 			if(centerY + 100 > GameScreen.getPlayer().getCenterY() - 40 && centerY - 100 < GameScreen.getPlayer().getCenterY() + 40) {
 				if (Rect.intersects(r, Player.rect)|| Rect.intersects(r, Player.rect2)) {
 					GameScreen.livesLeft--;
+					player.isDying = 100;
 					health--;
 				}
 			}
 		}
 	}
-
-	public abstract void follow();
 
 	// Places the enemy off screen, gives him no movement, and moves the collision rectangle out of the
 	// the way so that other projectiles don't run into it

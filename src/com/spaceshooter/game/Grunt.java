@@ -9,7 +9,7 @@ public class Grunt extends Enemy {
 		setCenterX(centerX);
 		setCenterY(centerY);
 		
-		speedY = 2;
+		speedY = 1;
 		speedX = 0;
 		firerate = 30;
 		health = 1;
@@ -35,21 +35,13 @@ public class Grunt extends Enemy {
 		if (player.isDying == 0) {
 			firerate--;
 			if(firerate <= 0) {
-				firerate = (int) (Math.random() * 30) + 10;
+				firerate = (int) (Math.random() * 30) + 20;
 				this.shoot();
 			}
 		}
 		
-		if(centerY - 25 >= 800) {
-			health = 0;
-			GameScreen.score -= 10;
-		}
-	}
-
-	@Override
-	public void follow() {
-		
-		
+		if(centerY - 25 >= 800) 
+			GameScreen.enemies.remove(this);
 	}
 
 	@Override
@@ -57,7 +49,7 @@ public class Grunt extends Enemy {
 		
 		if(health > 0) {
 			Projectile p = new Projectile(centerX, centerY+25);
-			p.setSpeedY(-11);
+			p.setSpeedY(-8);
 			projectiles.add(p);
 		}
 		

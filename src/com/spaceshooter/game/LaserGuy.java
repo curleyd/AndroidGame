@@ -64,18 +64,11 @@ public class LaserGuy extends Enemy {
 	}
 
 	@Override
-	public void follow() {
-		
-		
-
-	}
-
-	@Override
 	public void shoot() {
 		
 		if(health > 0) {
 			Projectile p = new Projectile(centerX, centerY+35);
-			p.setSpeedY(-13);
+			p.setSpeedY(-10);
 			projectiles.add(p);
 		}
 		

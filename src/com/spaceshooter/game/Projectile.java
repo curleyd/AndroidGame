@@ -6,7 +6,7 @@ import android.graphics.Rect;
 public class Projectile {
 
 	// Variable declarations
-	private int x, y, speedY, speedX;
+	private int x, y, speedY, speedX, width = 5, height = 8;
 	private boolean visible;
 	
 	private Rect r;
@@ -32,8 +32,8 @@ public class Projectile {
 		x -= speedX;
 		
 		// Sets the rectangle that is used to check collisions
-		r.set(x, y, x+5, y+10);
-		if (y < 0 || y > 800){
+		r.set(x, y, x+width, y+height);
+		if (y < 0 || y > 800 || x > 600 || x < 0){
 			visible = false;
 			r = null;
 		}
@@ -122,6 +122,24 @@ public class Projectile {
 	public void setR(Rect r) {
 		this.r = r;
 	}
+
+	public int getWidth() {
+		return width;
+	}
+
+	public int getHeight() {
+		return height;
+	}
+
+	public void setWidth(int width) {
+		this.width = width;
+	}
+
+	public void setHeight(int height) {
+		this.height = height;
+	}
+	
+	
 	
 	
 	

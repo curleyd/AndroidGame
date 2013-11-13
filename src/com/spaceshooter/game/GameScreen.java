@@ -16,10 +16,15 @@ import android.annotation.SuppressLint;
 import android.graphics.Color;
 import android.graphics.Paint;
 
+import com.spaceshooter.game.Doppleganger;
+import com.spaceshooter.game.LineShooter;
+import com.spaceshooter.game.Mine;
+import com.spaceshooter.game.Projectile;
 import com.spaceshooter.framework.Game;
 import com.spaceshooter.framework.Graphics;
 import com.spaceshooter.framework.Image;
 import com.spaceshooter.framework.Input.TouchEvent;
+import com.spaceshooter.framework.Music;
 import com.spaceshooter.framework.Screen;
 
 @SuppressLint("NewApi")
@@ -33,15 +38,18 @@ public class GameScreen extends Screen {
 
 	// Variable Setup
 	private static boolean updateScore, bossBattle;
-	private int newEnemy = 0, newEnemyTimer = 100;
+	public static boolean playSound, playMusic;
+	private int newEnemy = 5, newEnemyTimer = 180, warningCount = 0, Twarn = 0;
 	public static int score = 0, turnValue = 0, livesLeft, bombs;
 	private static Background bg1, bg2;
 	private static Player player;
 	public static ArrayList<Enemy> enemies;
 	public static ArrayList<PowerUp> powerups;
+	public static ArrayList<Explosion> explosions;
+	public static Music music;
 
 	private Image currentSprite, ship, shipr;
-	private Animation anim, deathanim;
+	private Animation anim, deathanim, expanim;
 
 	Paint paint, paint2;
 
@@ -62,7 +70,7 @@ public class GameScreen extends Screen {
 		
 		enemies = new ArrayList<Enemy>();
 		powerups = new ArrayList<PowerUp>();
-		
+		explosions = new ArrayList<Explosion>();
 
 		ship = Assets.ship;
 		shipr = Assets.ship_respawn;
@@ -91,6 +99,11 @@ public class GameScreen extends Screen {
 		
 		updateScore = true;
 		bossBattle = false;
+		
+		music = Assets.ingame;
+		
+		if(playMusic)
+			music.play();
 
 	}
 
@@ -172,8 +185,12 @@ public class GameScreen extends Screen {
 		}
 		
 		// Checks for death with no lives remaining, aka Game over
-		if (livesLeft == 0)
+		if (livesLeft == 0) {
 			state = GameState.GameOver;
+			
+			if(GameScreen.playSound)
+				Assets.playerDeath.play(0.1f);
+		}
 
 		// The next several lines update each object on screen, like the player, enemies, power-ups, and projectiles
 		player.update();
@@ -198,6 +215,15 @@ public class GameScreen extends Screen {
 				powerups.remove(i);
 		}
 		
+		// Updates power-ups if any exist
+		ArrayList<Explosion> localexplosions = new ArrayList<Explosion>(explosions);
+		for (Explosion exp:localexplosions) {
+			if (exp.isVisible())
+				exp.update();
+			else 
+				explosions.remove(exp);
+		}
+		
 		// Generates new enemies randomly on the map, if a Boss Battle isn't currently going on
 		if(!bossBattle) {
 			
@@ -213,12 +239,19 @@ public class GameScreen extends Screen {
 				// Generates new enemies based on percentages for now 50% Grunt, 30% Drone, 20% LaserGuy
 				if(newEnemy <= 0) {
 					int type = (int) (Math.random() * 100);
-					if(type < 50)
+					if(type < 30)
 						enemies.add(new Grunt((int)((Math.random() * (500)) + 50), 0));
-					else if (type < 80)
+					else if (type < 50)
 						enemies.add(new Drone((int)((Math.random() * (500)) + 50), 0));
-					else if(type < 100)
+					else if(type < 70)
 						enemies.add(new LaserGuy((int)((Math.random() * (500)) + 50), 0));
+					else if(type < 80)
+						enemies.add(new Mine((int)((Math.random() * (500)) + 50), 0));
+					else if(type < 90)
+						enemies.add(new LineShooter((int)((Math.random() * (450)) + 50), 0));
+					else
+						specialForm(type);
+					
 					
 					// newEnemy is a counter that is checked when trying to make a new Enemy. If the count
 					// is zero, than a new enemy is generated and it is set equal to newEnemyTimer, which
@@ -231,7 +264,7 @@ public class GameScreen extends Screen {
 		}
 		
 		// Boss battles start every 500 points
-		if(score % 500 == 0 && score > 0) 
+		if(score % 500 < 20 && score > 500) 
 			bossBattle = true;
 		
 		// Creates the boss only after the screen is void of enemies
@@ -256,19 +289,21 @@ public class GameScreen extends Screen {
 					enemyprojectiles.remove(i);
 			}
 			
-			if(enemy.health > 0)
+			if(enemy.health > 0 || (enemy instanceof Mine && enemy.health == 0))
 				enemy.update();
 			else {
 				// If the enemy dies, a power up has a chance of appearing based on the percentages below
 				if(enemy.health == 0){
-					score+=10;
+					updateScore(enemy);
 					enemy.health--;
 					if(Math.random()*100 < 2)
 						powerups.add(new PowerUp(enemy.getCenterX(), enemy.getCenterY(), 1));
-					else if (Math.random()*100 < 2 && livesLeft < 5)
+					else if (Math.random()*100 < 2 && livesLeft < 3)
 						powerups.add(new PowerUp(enemy.getCenterX(), enemy.getCenterY(), 2));
-					else if (Math.random()*100 < 3)
+					else if (Math.random()*100 < 2)
 						powerups.add(new PowerUp(enemy.getCenterX(), enemy.getCenterY(), 3));
+					
+					explosions.add(new Explosion(enemy.getCenterX(), enemy.getCenterY(), enemy));
 				}
 				
 				// The enemy is only removed once all of it's projectiles are no longer visible
@@ -296,6 +331,71 @@ public class GameScreen extends Screen {
 		}
 	}
 	
+	private void specialForm(int type) {
+		
+		switch(type) {
+			case 90:
+				for(int i = 1; i <= 3; i++){
+					LineShooter ls = new LineShooter(150 * i, 0);
+					ls.firerate = 50;
+					enemies.add(ls);
+				}
+				break;
+			case 91:
+				for(int i = 1; i <= 3; i++){
+					LineShooter ls = new LineShooter(150 * i, 0);
+					ls.firerate = 50;
+					enemies.add(ls);
+				}
+				break;
+			case 92:
+				for(int i = 1; i <= 3; i++){
+					LineShooter ls = new LineShooter(150 * i, 0);
+					ls.firerate = 50;
+					enemies.add(ls);
+				}
+				break;
+			case 93:
+				for(int i = 1; i <= 3; i++){
+					LineShooter ls = new LineShooter(150 * i, 0);
+					ls.firerate = 50;
+					enemies.add(ls);
+				}
+				break;
+			case 94:
+				for(int i = 1; i <= 3; i++){
+					LineShooter ls = new LineShooter(150 * i, 0);
+					ls.firerate = 50;
+					enemies.add(ls);
+				}
+				break;
+			case 95:
+				for(int i = 1; i <= 3; i++){
+					LineShooter ls = new LineShooter(150 * i, 0);
+					ls.firerate = 50;
+					enemies.add(ls);
+				}
+				break;
+			case 96:
+				for(int i = 1; i <= 6; i++)
+					enemies.add(new Drone(99 * i, 0));
+				break;
+			case 97:
+				for(int i = 1; i <= 6; i++)
+					enemies.add(new Drone(99 * i, 0));
+				break;
+			case 98:
+				for(int i = 1; i <= 6; i++)
+					enemies.add(new Drone(99 * i, 0));
+				break;
+			case 99:
+				for(int i = 1; i <= 6; i++)
+					enemies.add(new Drone(99 * i, 0));
+				break;
+		}
+		
+	}
+	
 	// Takens in a touch event, and sees if it is within the bounds given by the other 4 variables
 	private boolean inBounds(TouchEvent event, int x, int y, int width, int height) {
 		if (event.x > x && event.x < x + width - 1 && event.y > y
@@ -303,6 +403,40 @@ public class GameScreen extends Screen {
 			return true;
 		else
 			return false;
+	}
+	
+	// Update the score based on the enemy killed
+	private void updateScore(Enemy e) {
+		
+		if(e instanceof Drone)
+			score += 5;
+		if(e instanceof Grunt)
+			score += 10;
+		if(e instanceof LaserGuy || e instanceof Mine)
+			score += 20;
+		if(e instanceof LineShooter)
+			score += 30;
+		if(e instanceof Doppleganger)
+			score += 50;
+		
+	}
+	
+	// If the player touches the bomb icon while having a bomb, this method is called..
+	// It clears all enemies off the screen and adjusts the score based on each enemy, unless
+	// it is a boss battle. Bombs cannot defeat bosses
+	public void bomb() {
+		
+		ArrayList<Enemy> localEnemies = new ArrayList<Enemy>(enemies);
+		for(Enemy enemy:localEnemies) {
+			if(enemy instanceof Doppleganger)
+				continue;
+			enemies.remove(enemy);
+			updateScore(enemy);
+		}
+		
+		Graphics g = game.getGraphics();
+		g.drawRect(0, 0, 600, 800, Color.WHITE);
+		
 	}
 
 	// When the game is paused, this method will be called instead of the update method above
@@ -312,16 +446,31 @@ public class GameScreen extends Screen {
 		for (int i = 0; i < len; i++) {
 			TouchEvent event = touchEvents.get(i);
 			if (event.type == TouchEvent.TOUCH_UP) {
-				if (inBounds(event, 0, 0, 600, 400)) {
-
-					if (!inBounds(event, 0, 0, 50, 50)) {
-						resume();
-					}
+				if (inBounds(event, 100, 200, 400, 200)) {
+					resume();
 				}
 
-				if (inBounds(event, 0, 400, 600, 400)) {
+				if (inBounds(event, 100, 400, 400, 200)) {
 					nullify();
+					music.stop();
 					goToMenu();
+				}
+				
+				if(inBounds(event, 495, 0, 50, 50)) {
+				
+					if(playMusic) {
+						playMusic = false;
+						music.stop();
+					}
+					else {
+						music.play();
+						playMusic = true;
+					}
+					game.setAudio();
+				}
+				if(inBounds(event, 550, 0, 50, 50)) {
+					playSound = !playSound;
+					game.setAudio();
 				}
 			}
 		}
@@ -335,6 +484,8 @@ public class GameScreen extends Screen {
 			game.setHighScores(score);
 			updateScore = false;
 		}
+		
+		music.stop();
 
 		int len = touchEvents.size();
 		for (int i = 0; i < len; i++) {
@@ -349,26 +500,6 @@ public class GameScreen extends Screen {
 				}
 			}
 		}
-		
-		
-	}
-	
-	// If the player touches the bomb icon while having a bomb, this method is called..
-	// It clears all enemies off the screen and adjusts the score based on each enemy, unless
-	// it is a boss battle. Bombs cannot defeat bosses
-	public void bomb() {
-		
-		ArrayList<Enemy> localEnemies = new ArrayList<Enemy>(enemies);
-		for(Enemy enemy:localEnemies) {
-			if(enemy instanceof Doppleganger)
-				continue;
-			enemies.remove(enemy);
-			score += 10;
-		}
-		
-		Graphics g = game.getGraphics();
-		g.drawRect(0, 0, 600, 800, Color.WHITE);
-		
 	}
 
 	// Paint is called every iteration of the game, whether it is paused or at game over. This handles painting
@@ -398,6 +529,9 @@ public class GameScreen extends Screen {
 		for (PowerUp i:powerups)
 			g.drawImage(i.getTypeImage(), i.getX(), i.getY());
 		
+		for (Explosion exp: explosions)
+			g.drawImage(exp.image, exp.getCenterX(), exp.getCenterY());
+		
 		
 		// This check verifies that the player isn't dying, and sets the banking of the ship
 		// according to its y velocity
@@ -406,21 +540,28 @@ public class GameScreen extends Screen {
 		
 		// Draws the player. currentSprite is the current display of player. If the player is dying, then
 		// deathanim is the current sprite. If the player is moving laterally, then getShipBank()
-		// above determines how far the ship is tilted tot he right or left
+		// above determines how far the ship is tilted to the right or left
 		g.drawImage(currentSprite, player.getCenterX() - currentSprite.getWidth()/2, player.getCenterY() - currentSprite.getHeight()/2);
 		
 		// Draws the enemies
 		for(Enemy enemy: enemies) {
 			g.drawImage(enemy.getImage(), enemy.getCenterX() - (enemy.getImage().getWidth()/2), enemy.getCenterY() - (enemy.getImage().getHeight()/2));
 			
-			ArrayList enemyprojectiles = enemy.getProjectiles();
-			for (int i = 0; i < enemyprojectiles.size(); i++) {
-				Projectile p = (Projectile) enemyprojectiles.get(i);
-				g.drawImage(Assets.elaser, p.getX() - Assets.elaser.getWidth()/2, p.getY() - Assets.elaser.getHeight()/2);
-			}
+			ArrayList<Projectile> eproj = enemy.getProjectiles();
+			for(Projectile ep : eproj){
+				
+				if(enemy instanceof LineShooter)
+					g.drawImage(Assets.lsLas, ep.getX() - 16, ep.getY());
+				else if(enemy instanceof Mine)
+					g.drawImage(Assets.mSpike, ep.getX() - 10, ep.getY());
+				else if(enemy instanceof Doppleganger)
+					g.drawImage(Assets.lsLas, ep.getX() - 16, ep.getY());
+				else
+					g.drawImage(Assets.elaser, ep.getX() - 16, ep.getY() - 6);
+			}					
 			
 			// If there is a boss fight, then the drawBossUI() method is called to update the display
-			if(enemy instanceof Doppleganger)
+			if(bossBattle)
 				drawBossUI();
 		}
 		
@@ -438,7 +579,7 @@ public class GameScreen extends Screen {
 
 	public void animate() {
 		anim.update(10);
-		deathanim.update(50);
+		deathanim.update(20);
 	}
 
 	private void nullify() {
@@ -457,7 +598,7 @@ public class GameScreen extends Screen {
 		anim = null;
 		deathanim = null;
 		newEnemy = 0;
-		newEnemyTimer = 100;
+		newEnemyTimer = 180;
 		
 		score = 0;
 
@@ -474,8 +615,21 @@ public class GameScreen extends Screen {
 		
 		if(e.health > 0)
 			g.drawRect(100, 40, (e.health * 4), 10, Color.GREEN);
-		else
+		else {
 			bossBattle = false;
+			Twarn = 0;
+			warningCount = 0;
+		}
+		
+		if(warningCount < 10 && Twarn < 3)
+			g.drawImage(Assets.warning, 0, 600);
+		
+		if(warningCount >= 20){
+			warningCount = 0;
+			Twarn++;
+		}
+		
+		warningCount++;
 	}
 	
 	// Displays the Tap to Start at the beginning 
@@ -521,19 +675,19 @@ public class GameScreen extends Screen {
 	private void getShipBank() {
 		
 		// turnValue is the lateral velocity of the ship
-		if(turnValue < -5)
+		if(turnValue < -3)
 			currentSprite = Assets.shipL3;
-		else if(turnValue < -2)
+		else if(turnValue < -1)
 			currentSprite = Assets.shipL2;
 		else if(turnValue < 0)
 			currentSprite = Assets.shipL1;
 		else if(turnValue == 0)
 			currentSprite = Assets.ship;
-		else if(turnValue > 0 && turnValue <= 2)
+		else if(turnValue > 0 && turnValue <= 1)
 			currentSprite = Assets.shipR1;
-		else if(turnValue > 2 && turnValue <= 5)
+		else if(turnValue > 1 && turnValue <= 3)
 			currentSprite = Assets.shipR2;
-		else if(turnValue > 5)
+		else if(turnValue > 3)
 			currentSprite = Assets.shipR3;
 		
 		// Resets the value at the end so that if the user stops suddenly, the ship isn't stuck banking
@@ -549,6 +703,16 @@ public class GameScreen extends Screen {
 		g.drawARGB(155, 0, 0, 0);
 		g.drawString("Resume", 300, 300, paint2);
 		g.drawString("Menu", 300, 500, paint2);
+		
+		if(playMusic)
+			g.drawImage(Assets.musicon, 495, 0);
+		else
+			g.drawImage(Assets.musicoff, 495, 0);
+		
+		if(playSound)
+			g.drawImage(Assets.soundon, 550, 0);
+		else
+			g.drawImage(Assets.soundoff, 550, 0);
 
 	}
 
@@ -570,6 +734,8 @@ public class GameScreen extends Screen {
 	public void pause() {
 		if (state == GameState.Running)
 			state = GameState.Paused;
+		
+		music.setVolume(0.1f);
 
 	}
 
@@ -577,6 +743,7 @@ public class GameScreen extends Screen {
 	public void resume() {
 		if (state == GameState.Paused)
 			state = GameState.Running;
+		music.setVolume(0.3f);
 	}
 
 	@Override

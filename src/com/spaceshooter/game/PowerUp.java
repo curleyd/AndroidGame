@@ -66,6 +66,9 @@ public class PowerUp {
 			
 			visible = false;
 			
+			if(GameScreen.playSound)
+				Assets.powerup.play(0.5f);
+			
 			// Depending on the PowerUp, certain properties are modified. Pretty 
 			// self-explanatory by the variable names
 			switch(this.type) {

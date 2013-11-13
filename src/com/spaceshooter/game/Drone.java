@@ -8,9 +8,6 @@ public class Drone extends Enemy {
 		
 		setCenterX(centerX);
 		setCenterY(centerY);
-		
-		speedY = 4;
-		speedX = 4;
 		health = 1;
 		
 		image = Assets.drone;
@@ -30,13 +27,11 @@ public class Drone extends Enemy {
 			checkCollision();
 		
 		if(centerY - 25 >= 800) {
-			health = 0;
-			GameScreen.score -= 10;
+			GameScreen.enemies.remove(this);
 		}
 
 	}
 
-	@Override
 	public void follow() {
 		
 		int i = player.getCenterX() - centerX;
@@ -47,8 +42,8 @@ public class Drone extends Enemy {
 		double unitY = j / distance;
 		
 		
-		speedX = (int) (unitX * 8);
-		speedY = (int) (unitY * 8);
+		speedX = (int) (unitX * 5);
+		speedY = (int) (unitY * 6);
 		
 		centerX += speedX;
 		centerY += speedY;
